@@ -67,18 +67,25 @@ You need: macOS, Python 3.9+, and `git`.
 git clone https://github.com/DYCON-dev/malveillance-max.git
 cd malveillance-max
 
-# Pick any of your existing git repos as the "canvas".
-# Empty commits will land in this repo. Keep one repo dedicated to
-# this if you want to keep your real repos clean.
-./install.sh /path/to/your/target/repo
+# Create a dedicated repo on GitHub for the empty commits (any name).
+# Then pass its remote URL — NOT a local path. The installer clones it
+# into ~/Library/Application Support/malveillance-max/canvas/, which
+# is a TCC-safe location that LaunchAgents can access.
+./install.sh git@github.com:you/your-canvas.git
 ```
 
 The installer:
 
-1. Writes `~/.config/malveillance-max/config.json` with your name, email (read from your global git config), and the target repo path
-2. Writes `~/Library/LaunchAgents/com.malveillance-max.plist` (the launchd job)
-3. Registers the job with `launchctl load`
-4. Prints a one-liner to test it now
+1. Clones the given remote into `~/Library/Application Support/malveillance-max/canvas/`
+2. Copies the daemon script into the same Application Support folder
+3. Writes `~/.config/malveillance-max/config.json` with your name and email (read from your global git config) and the canvas path
+4. Writes `~/Library/LaunchAgents/com.malveillance-max.plist` (the launchd job)
+5. Registers the job with `launchctl load`
+6. Prints a one-liner to test it now
+
+### Why a URL and not a local path?
+
+Since macOS 12, LaunchAgents cannot read files inside `~/Documents`, `~/Downloads`, `~/Desktop` etc. without manual "Full Disk Access" approval per binary in System Settings. Rather than fight that, the installer keeps the daemon and its working clone inside `~/Library/Application Support/`, which is accessible to LaunchAgents by default. Pass a remote URL and the installer takes care of cloning to the right place.
 
 ### Test it now (don't wait for Friday)
 
